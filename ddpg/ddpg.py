@@ -12,6 +12,7 @@ Author: Patrick Emami
 import tensorflow as tf
 import numpy as np
 import gym
+import gym_grl
 from gym import wrappers
 import tflearn
 import argparse
@@ -287,7 +288,7 @@ def train(sess, env, args, actor, critic, actor_noise):
             #a = actor.predict(np.reshape(s, (1, 3))) + (1. / (1. + i))
             a = actor.predict(np.reshape(s, (1, actor.s_dim))) + actor_noise()
 
-            s2, r, terminal, info = env.step(a[0])
+            s2, r, terminal, info = env.step(a[0])  
 
             replay_buffer.add(np.reshape(s, (actor.s_dim,)), np.reshape(a, (actor.a_dim,)), r,
                               terminal, np.reshape(s2, (actor.s_dim,)))
@@ -391,7 +392,8 @@ if __name__ == '__main__':
     parser.add_argument('--minibatch-size', help='size of minibatch for minibatch-SGD', default=64)
 
     # run parameters
-    parser.add_argument('--env', help='choose the gym env- tested on {Pendulum-v0}', default='Pendulum-v0')
+    #parser.add_argument('--env', help='choose the gym env- tested on {Pendulum-v0}', default='Pendulum-v0')
+    parser.add_argument('--env', help='choose the gym env- tested on {Pendulum-grl-v0}', default='Pendulum-grl-v0')
     parser.add_argument('--random-seed', help='random seed for repeatability', default=1234)
     parser.add_argument('--max-episodes', help='max num of episodes to do while training', default=50000)
     parser.add_argument('--max-episode-len', help='max length of 1 episode', default=1000)
