@@ -286,6 +286,8 @@ def train(sess, env, args, actor, critic, actor_noise):
 
             # Added exploration noise
             #a = actor.predict(np.reshape(s, (1, 3))) + (1. / (1. + i))
+            #print("actor.s_dim: ", actor.s_dim)
+            #print("s: ", s)
             a = actor.predict(np.reshape(s, (1, actor.s_dim))) + actor_noise()
 
             s2, r, terminal, info = env.step(a[0])  
@@ -327,10 +329,13 @@ def train(sess, env, args, actor, critic, actor_noise):
 
             s = s2
             ep_reward += r
+            print("s: ", s)
+            print("ep_reward: ", ep_reward)
 
             if terminal:
 
                 summary_str = sess.run(summary_ops, feed_dict={
+                    #summary_vars[0]: ep_reward,
                     summary_vars[0]: ep_reward,
                     summary_vars[1]: ep_ave_max_q / float(j)
                 })
@@ -338,7 +343,7 @@ def train(sess, env, args, actor, critic, actor_noise):
                 writer.add_summary(summary_str, i)
                 writer.flush()
 
-                print('| Reward: {:d} | Episode: {:d} | Qmax: {:.4f}'.format(int(ep_reward), \
+                print('| Reward / float(j): {:d} | Episode: {:d} | Qmax: {:.4f}'.format(int(ep_reward), \
                         i, (ep_ave_max_q / float(j))))
                 break
 
@@ -351,7 +356,8 @@ def main(args):
         tf.set_random_seed(int(args['random_seed']))
         env.seed(int(args['random_seed']))
 
-        state_dim = env.observation_space.shape[0]
+        #state_dim = env.observation_space.shape[0]
+        state_dim = env.observation_space.shape[0]-1
         action_dim = env.action_space.shape[0]
         action_bound = env.action_space.high
         # Ensure action bound is symmetric
@@ -396,13 +402,13 @@ if __name__ == '__main__':
     parser.add_argument('--env', help='choose the gym env- tested on {Pendulum-grl-v0}', default='Pendulum-grl-v0')
     parser.add_argument('--random-seed', help='random seed for repeatability', default=1234)
     parser.add_argument('--max-episodes', help='max num of episodes to do while training', default=50000)
-    parser.add_argument('--max-episode-len', help='max length of 1 episode', default=1000)
+    parser.add_argument('--max-episode-len', help='max length of 1 episode', default=100)
     parser.add_argument('--render-env', help='render the gym env', action='store_true')
     parser.add_argument('--use-gym-monitor', help='record gym results', action='store_true')
     parser.add_argument('--monitor-dir', help='directory for storing gym results', default='./results/gym_ddpg')
     parser.add_argument('--summary-dir', help='directory for storing tensorboard info', default='./results/tf_ddpg')
 
-    parser.set_defaults(render_env=False)
+    parser.set_defaults(render_env=True)
     parser.set_defaults(use_gym_monitor=True)
     
     args = vars(parser.parse_args())
