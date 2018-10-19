@@ -222,10 +222,13 @@ class OrnsteinUhlenbeckActionNoise:
         self.reset()
 
     def __call__(self):
-        x = self.x_prev + self.theta * (self.mu - self.x_prev) * self.dt + \
-                self.sigma * np.sqrt(self.dt) * np.random.normal(size=self.mu.shape)
+        x = self.x_prev + self.theta * (self.mu - self.x_prev) + \
+                self.sigma * np.random.normal(size=self.mu.shape)
+        #x = self.x_prev + self.theta * (self.mu - self.x_prev) * self.dt + \
+        #        self.sigma * np.sqrt(self.dt) * np.random.normal(size=self.mu.shape)
         self.x_prev = x
         return x
+        #return self.sigma * np.random.normal(size=self.mu.shape)
 
     def reset(self):
         self.x_prev = self.x0 if self.x0 is not None else np.zeros_like(self.mu)
@@ -329,8 +332,8 @@ def train(sess, env, args, actor, critic, actor_noise):
 
             s = s2
             ep_reward += r
-            print("s: ", s)
-            print("ep_reward: ", ep_reward)
+            #print("s: ", s)
+            #print("ep_reward: ", ep_reward)
 
             if terminal:
 
@@ -356,8 +359,7 @@ def main(args):
         tf.set_random_seed(int(args['random_seed']))
         env.seed(int(args['random_seed']))
 
-        #state_dim = env.observation_space.shape[0]
-        state_dim = env.observation_space.shape[0]-1
+        state_dim = env.observation_space.shape[0]
         action_dim = env.action_space.shape[0]
         action_bound = env.action_space.high
         # Ensure action bound is symmetric
@@ -408,7 +410,7 @@ if __name__ == '__main__':
     parser.add_argument('--monitor-dir', help='directory for storing gym results', default='./results/gym_ddpg')
     parser.add_argument('--summary-dir', help='directory for storing tensorboard info', default='./results/tf_ddpg')
 
-    parser.set_defaults(render_env=True)
+    parser.set_defaults(render_env=False)
     parser.set_defaults(use_gym_monitor=True)
     
     args = vars(parser.parse_args())
